@@ -7,6 +7,8 @@ public class Student {
     private Integer id;
     private String student_name;
     private String password;
+    private Integer classid;
+
 
     private Class aClass;
 
@@ -42,6 +44,14 @@ public class Student {
 
     public void setPassword(String password) {
         this.password = password;
+    }
+
+    public Integer getClassid() {
+        return classid;
+    }
+
+    public void setClassid(Integer classid) {
+        this.classid = classid;
     }
 
     public Class getaClass() {

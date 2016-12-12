@@ -5,11 +5,16 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 import org.springframework.jdbc.core.BeanPropertyRowMapper;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.namedparam.BeanPropertySqlParameterSource;
+import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
+import org.springframework.jdbc.core.namedparam.SqlParameterSource;
 
 import javax.sql.DataSource;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Created by Administrator on 2016-11-29.
@@ -18,10 +23,42 @@ public class JDBCTest {
     private ApplicationContext ctx = null;
     private JdbcTemplate jdbcTemplate;
     private StudentDao studentDao;
+    private NamedParameterJdbcTemplate namedParameterJdbcTemplate;
     {
         ctx = new ClassPathXmlApplicationContext("applicationContext.xml");
         jdbcTemplate = (JdbcTemplate)ctx.getBean("jdbcTemplate");
         studentDao = ctx.getBean(StudentDao.class);
+        namedParameterJdbcTemplate = ctx.getBean(NamedParameterJdbcTemplate.class);
+    }
+
+    /**
+     *使用具名参数时，可以使用update(sql,sqlParameterSource)方法进行更新操作，
+     * 1.sql语句中的参数名与类的属性一致
+     * 2.使用SqlParameterSource的实现类BeanPropertySqlParameterSource作为参数
+     */
+    @Test
+    public void testNamedParameterJdbcTemplate2(){
+        String sql = "insert into student(name,password,classid) values(:student_name,:password,:classid)";
+        Student student = new Student();
+        student.setPassword("123");
+        student.setStudent_name("jidongyuan");
+        student.setClassid(3);
+        SqlParameterSource sqlParameterSource = new BeanPropertySqlParameterSource(student);
+        namedParameterJdbcTemplate.update(sql,sqlParameterSource);
+    }
+
+    /**
+     *可以为参数起名字
+     * 1.优点：若有多个参数，则不在对应位置，直接对应参数名，便于维护
+     * 2.缺点：较为麻烦
+     */
+    @Test
+    public void testNamedParameterJdbcTemplate(){
+        String sql = "insert into user(name,password,classid) values(:name,:password,:classid)";
+        Map<String,Object> map = new HashMap<>();
+        map.put("_name","jidongyuan");
+        map.put("_password","123456");
+        namedParameterJdbcTemplate.update(sql,map);
     }
 
     @Test

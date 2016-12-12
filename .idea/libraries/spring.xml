@@ -26,6 +26,7 @@
       <root url="jar://$PROJECT_DIR$/lib/spring-webmvc-portlet-4.2.0.RELEASE.jar!/" />
       <root url="jar://$PROJECT_DIR$/lib/spring-websocket-4.2.0.RELEASE.jar!/" />
       <root url="jar://$PROJECT_DIR$/lib/commons-logging-1.0.4.jar!/" />
+      <root url="jar://$PROJECT_DIR$/lib/aopalliance-1.0.jar!/" />
     </CLASSES>
     <JAVADOC>
       <root url="jar://$PROJECT_DIR$/lib/spring-aop-4.2.0.RELEASE-javadoc.jar!/" />
