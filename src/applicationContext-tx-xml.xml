@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xmlns:tx="http://www.springframework.org/schema/tx"
+       xmlns:jdbc="http://www.springframework.org/schema/jdbc"
+       xmlns:aop="http://www.springframework.org/schema/aop"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+       http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-3.2.xsd
+       http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx.xsd http://www.springframework.org/schema/jdbc http://www.springframework.org/schema/jdbc/spring-jdbc.xsd
+       http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop.xsd">
+
+       <context:component-scan base-package="com.spring"></context:component-scan>
+
+       <!--导入资源文件-->
+       <context:property-placeholder location="db.properties"></context:property-placeholder>
+
+       <!--配置C3P0数据源-->
+       <bean id="dataSource" class="com.mchange.v2.c3p0.ComboPooledDataSource">
+              <property name="user" value="${jdbc.user}"></property>
+              <property name="password" value="${jdbc.password}"></property>
+              <property name="jdbcUrl" value="${jdbc.jdbcUrl}"></property>
+              <property name="driverClass" value="${jdbc.driverClass}"></property>
+
+              <property name="initialPoolSize" value="${jdbc.initPoolSize}"></property>
+              <property name="maxPoolSize" value="${jdbc.maxPoolSize}"></property>
+       </bean>
+
+       <!--配置spring的jdbc template-->
+       <bean id="jdbcTemplate" class="org.springframework.jdbc.core.JdbcTemplate">
+              <property name="dataSource" ref="dataSource"></property>
+       </bean>
+
+       <!--配置bean-->
+       <bean id="bookShopDao" class="com.spring.tx_xml.BookShopDaoImpl">
+              <property name="jdbcTemplate" ref="jdbcTemplate"></property>
+       </bean>
+
+       <bean id="bookShopService" class="com.spring.tx_xml_service_impl.BookShopServiceImpl">
+              <property name="bookShopDao" ref="bookShopDao"></property>
+       </bean>
+
+       <bean id="cashier" class="com.spring.tx_xml_service_impl.CashierImpl">
+              <property name="bookShopService" ref="bookShopService"></property>
+       </bean>
+
+       <!--1.配置事务管理器-->
+       <bean id="transactionManager" class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
+              <property name="dataSource" ref="dataSource"></property>
+       </bean>
+
+       <!--2.配置事务属性-->
+       <tx:advice id="txAdvice" transaction-manager="transactionManager">
+              <tx:attributes>
+                     <!--根据方法名指定事务属性-->
+                     <tx:method name="purchase" propagation="REQUIRES_NEW"/><!--通常propagation="REQUIRES_NEW"是默认的，不需要设置-->
+                     <tx:method name="get*" read-only="true"></tx:method>
+                     <tx:method name="find*" read-only="true"></tx:method>
+                     <tx:method name="*"/>
+              </tx:attributes>
+       </tx:advice>
+
+       <!--3.配置事务切入点，以及把切入点与事务属性关联起来-->
+       <aop:config>
+              <aop:pointcut expression="execution(* com.spring.tx_xml_service.*.*(..))" id="txPointCut"></aop:pointcut>
+              <aop:advisor advice-ref="txAdvice" pointcut-ref="txPointCut"></aop:advisor>
+       </aop:config>
+
+</beans>
+
+
+        <!--
+        xmlns:aop="http://www.springframework.org/schema/context" 不能加
+        -->
